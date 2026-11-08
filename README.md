@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# تحليلات جودة العربيات 🚗
 
-## Getting Started
+برنامج لمهندس الجودة في معرض العربيات: بتسجّل فيه **الفحوصات، العيوب، أوامر الصيانة، وشكاوى العملاء**، وبيطلعلك لوحة متابعة بالمؤشرات والرسومات، وبيصدّر **تقارير إكسيل و PDF** منسقة بالعربي.
 
-First, run the development server:
+## التشغيل لأول مرة
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run setup     # تثبيت الحزم + إنشاء ملف .env + إنشاء قاعدة بيانات فاضية
+npm run dev       # افتح http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+لو عايز بيانات تجريبية للتجربة: `npm run db:seed` (⚠️ بيمسح أي بيانات موجودة).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+للتشغيل النهائي (أسرع):
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build && npm start
+```
 
-## Learn More
+## الأوامر المفيدة
 
-To learn more about Next.js, take a look at the following resources:
+| الأمر | الوظيفة |
+|---|---|
+| `npm run db:seed` | يمسح البيانات ويحط بيانات تجريبية من جديد (⚠️ بيمسح بياناتك) |
+| `npx prisma studio` | يفتح قاعدة البيانات في المتصفح للتعديل المباشر |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## الصفحات
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **لوحة المتابعة**: نسبة النجاح من أول مرة، العيوب المفتوحة، تكلفة الإصلاح، نسبة رجوع العربيات، مدة التسليم، رضا العملاء، مع فلتر بالتاريخ.
+- **العربيات / الفحوصات / العيوب / أوامر الصيانة / الشكاوى**: إضافة وتعديل ومسح، مع بحث وفلاتر وترتيب.
+- **الفحص**: قائمة بنود جاهزة (موتور، فرامل، صاج، كهرباء…)، والنتيجة بتتحسب لوحدها. وتقدر تنزّل **شهادة فحص PDF** لكل عربية.
+- **التقارير والتصدير**: تختار الفترة والأقسام وتنزّل:
+  - **إكسيل**: شيت ملخص وشيت لكل قسم، الشيتات من اليمين للشمال، بألوان للخطورة والحالة، وفلاتر، وإجماليات بمعادلات، وجاهزة للطباعة.
+  - **PDF**: صفحة مؤشرات ورسومات، وبعدها جداول لكل قسم.
 
-## Deploy on Vercel
+## الإعدادات
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- اسم الإدارة أو المعرض اللي بيظهر في التقارير: حط في ملف `.env`:
+  `NEXT_PUBLIC_DEALERSHIP_NAME="اسم المعرض"`
+- البيانات محفوظة في ملف `prisma/dev.db`. خد منه نسخة احتياطية كل فترة.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## التقنيات
+
+Next.js 15 · Prisma + SQLite · Tailwind CSS · Recharts · ExcelJS · React-PDF (خط Cairo)

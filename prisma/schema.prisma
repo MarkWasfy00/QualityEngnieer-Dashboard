@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Vehicle {
+  id          Int          @id @default(autoincrement())
+  vin         String       @unique
+  warehouseName   String? // اسم المخزن
+  warehouseKeeper String? // أمين المخزن
+  branchId    Int?
+  branch      Branch?      @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  make        String
+  model       String
+  year        Int
+  mileage     Int          @default(0)
+  color       String?
+  condition   String       @default("Used") // New | Used
+  createdAt   DateTime     @default(now())
+  inspections Inspection[]
+  defects     Defect[]
+  serviceJobs ServiceJob[]
+  complaints  Complaint[]
+  sales       Sale[]
+}
+
+model Inspection {
+  id        Int              @id @default(autoincrement())
+  vehicleId Int
+  vehicle   Vehicle          @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  date      DateTime
+  inspector String
+  type      String // PDI | Used-car intake | Pre-delivery
+  score     Float            @default(0)
+  result    String           @default("PASS") // PASS | FAIL
+  notes     String?
+  items     InspectionItem[]
+  defects   Defect[]
+  createdAt DateTime         @default(now())
+}
+
+model InspectionItem {
+  id           Int        @id @default(autoincrement())
+  inspectionId Int
+  inspection   Inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  category     String
+  item         String
+  result       String // PASS | FAIL | NA
+  notes        String?
+}
+
+model Defect {
+  id           Int         @id @default(autoincrement())
+  vehicleId    Int
+  vehicle      Vehicle     @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  inspectionId Int?
+  inspection   Inspection? @relation(fields: [inspectionId], references: [id], onDelete: SetNull)
+  category     String
+  description  String
+  severity     String // Low | Medium | High | Critical
+  status       String      @default("Open") // Open | In Progress | Fixed | Closed
+  technician   String?
+  repairCost   Float       @default(0)
+  reportedAt   DateTime
+  fixedAt      DateTime?
+  createdAt    DateTime    @default(now())
+}
+
+model ServiceJob {
+  id         Int       @id @default(autoincrement())
+  vehicleId  Int
+  vehicle    Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  roNumber   String
+  jobType    String
+  technician String?
+  openedAt   DateTime
+  closedAt   DateTime?
+  laborHours Float     @default(0)
+  laborCost  Float     @default(0)
+  partsCost  Float     @default(0)
+  isComeback Boolean   @default(false)
+  status     String    @default("Open") // Open | In Progress | Completed
+  createdAt  DateTime  @default(now())
+}
+
+model Complaint {
+  id           Int       @id @default(autoincrement())
+  vehicleId    Int?
+  vehicle      Vehicle?  @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  branchId     Int? // empty = use the vehicle's branch
+  branch       Branch?   @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  customerName String
+  contact      String?
+  date         DateTime
+  category     String
+  description  String
+  status       String    @default("Open") // Open | Investigating | Resolved | Closed
+  resolvedAt   DateTime?
+  satisfaction Int? // 1-5
+  createdAt    DateTime  @default(now())
+}
+
+model Sale {
+  id            Int       @id @default(autoincrement())
+  vehicleId     Int
+  vehicle       Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  salesmanId    Int
+  salesman      Salesman  @relation(fields: [salesmanId], references: [id], onDelete: Restrict)
+  customerName  String
+  customerPhone String?
+  saleDate      DateTime
+  price         Float     @default(0)
+  paymentType   String    @default("Cash") // Cash | Installments | Bank
+  deliveredAt   DateTime?
+  notes         String?
+  createdAt     DateTime  @default(now())
+}
+
+/// A customer visit/lead handled by a salesman (for conversion rate).
+model Visit {
+  id            Int      @id @default(autoincrement())
+  salesmanId    Int
+  salesman      Salesman @relation(fields: [salesmanId], references: [id], onDelete: Restrict)
+  count         Int      @default(1) // >1 = bulk entry (e.g. 88 visits with the same outcome)
+  customerName  String? // required for single visits, empty for bulk
+  customerPhone String?
+  visitDate     DateTime
+  source        String   @default("زيارة للمعرض")
+  interestedIn  String?
+  outcome       String   @default("FollowUp") // Won | Lost | FollowUp
+  notes         String?
+  createdAt     DateTime @default(now())
+}
+
+/// Salesmen master list, selected from drop-downs in Sales and Visits.
+model Salesman {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  phone     String?
+  hiredAt   DateTime?
+  branchId  Int?
+  branch    Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  active    Boolean  @default(true)
+  notes     String?
+  createdAt DateTime @default(now())
+  sales     Sale[]
+  visits    Visit[]
+}
+
+/// Dealership branches (showrooms / service centers).
+model Branch {
+  id         Int         @id @default(autoincrement())
+  name       String      @unique
+  city       String?
+  manager    String?
+  active     Boolean     @default(true)
+  notes      String?
+  createdAt  DateTime    @default(now())
+  vehicles   Vehicle[]
+  salesmen   Salesman[]
+  complaints Complaint[]
+}
