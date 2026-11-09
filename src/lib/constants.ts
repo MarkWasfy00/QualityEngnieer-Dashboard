@@ -19,6 +19,7 @@ export const LABELS: Record<string, string> = {
   Completed: "خلصت", Investigating: "تحت الفحص", Resolved: "اتحلت",
   Cash: "كاش", Installments: "تقسيط", Bank: "تمويل بنكي",
   Won: "اشترى", Lost: "مشتراش", FollowUp: "لسه بيفكر",
+  Collected: "اتحصّلت", Returned: "مردودات", Installment: "قسط",
 };
 export const label = (code: string | null | undefined) => (code ? LABELS[code] ?? code : "");
 export const options = (codes: readonly string[]) => codes.map((c) => ({ value: c, label: label(c) }));
@@ -78,6 +79,8 @@ export const STATUS_COLORS: Record<string, { bg: string; fg: string }> = {
   Fixed: { bg: "DCF5E6", fg: "067647" },
   Completed: { bg: "DCF5E6", fg: "067647" },
   Resolved: { bg: "DCF5E6", fg: "067647" },
+  Collected: { bg: "DCF5E6", fg: "067647" },
+  Returned: { bg: "EEF0F3", fg: "4B5563" },
   Closed: { bg: "E4E9F2", fg: "344054" },
   Won: { bg: "DCF5E6", fg: "067647" },
   FollowUp: { bg: "FEF6D3", fg: "93670B" },

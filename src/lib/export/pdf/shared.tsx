@@ -88,10 +88,10 @@ export function Table<R>({ cols, rows }: { cols: TCol<R>[]; rows: R[] }) {
 }
 
 /** Horizontal bar chart (bars grow right-to-left). */
-export function HBarChart({ data, width = 250, color = C.s1, codes = false, max: maxRows = 8 }: { data: { name: string; value: number }[]; width?: number; color?: string; codes?: boolean; max?: number }) {
+export function HBarChart({ data, width = 250, color = C.s1, codes = false, max: maxRows = 8, fmt = (n: number) => int(n), valW: valWidth = 22 }: { data: { name: string; value: number }[]; width?: number; color?: string; codes?: boolean; max?: number; fmt?: (n: number) => string; valW?: number }) {
   const rows = data.slice(0, maxRows);
   const max = Math.max(1, ...rows.map((d) => d.value));
-  const labelW = 80, valW = 22, barW = width - labelW - valW;
+  const labelW = 80, valW = valWidth, barW = width - labelW - valW;
   return (
     <View>
       {rows.map((d) => {
@@ -103,7 +103,7 @@ export function HBarChart({ data, width = 250, color = C.s1, codes = false, max:
               <Rect x={0} y={0} width={barW} height={10} fill="#f1f4f9" rx={2} />
               <Rect x={barW - w} y={0} width={w} height={10} fill={color} rx={2} />
             </Svg>
-            <T style={{ width: valW, fontSize: 7.5, lineHeight: 1.3, textAlign: "left", paddingLeft: 3 }}>{int(d.value)}</T>
+            <T style={{ width: valW, fontSize: 7.5, lineHeight: 1.3, textAlign: "left", paddingLeft: 3 }}>{fmt(d.value)}</T>
           </View>
         );
       })}

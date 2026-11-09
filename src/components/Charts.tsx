@@ -108,6 +108,63 @@ export function MultiLine({ data, names, colors }: { data: Record<string, number
   );
 }
 
+/** Deals per month split into collected / still open (receivables). */
+export function CollectionTrend({ data }: { data: { month: string; collected: number; open: number }[] }) {
+  if (!data.length) return <Empty />;
+  const rows = data.map((d) => ({ ...d, label: monthLabel(d.month) }));
+  return (
+    <ResponsiveContainer>
+      <BarChart data={rows} barCategoryGap="25%">
+        {grid}
+        <XAxis dataKey="label" {...axis} reversed />
+        <YAxis {...axis} allowDecimals={false} orientation="right" tickFormatter={n} />
+        <Tooltip {...tip} formatter={(v) => n(v)} />
+        <Legend {...legend} />
+        <Bar dataKey="collected" name="اتحصّلت" stackId="a" fill={SERIES[0]} stroke="#fff" strokeWidth={2} maxBarSize={36} />
+        <Bar dataKey="open" name="لسه" stackId="a" fill={SERIES[1]} stroke="#fff" strokeWidth={2} radius={[4, 4, 0, 0]} maxBarSize={36} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+/** Average days from sale to collection, by collection month (dashed line = target). */
+export function DaysLine({ data, target }: { data: { month: string; avg: number }[]; target?: number }) {
+  if (!data.length) return <Empty />;
+  const rows = data.map((d) => ({ ...d, label: monthLabel(d.month), target }));
+  return (
+    <ResponsiveContainer>
+      <LineChart data={rows} margin={{ top: 10, left: 10, right: 10 }}>
+        {grid}
+        <XAxis dataKey="label" {...axis} reversed />
+        <YAxis {...axis} allowDecimals={false} orientation="right" tickFormatter={n} />
+        <Tooltip contentStyle={tip.contentStyle}
+          formatter={(v, k) => [`${n(v)} يوم`, k === "target" ? "المستهدف" : "متوسط أيام التحصيل"]} />
+        {target != null && <Line dataKey="target" stroke="#94a3b8" strokeDasharray="4 4" dot={false} strokeWidth={1.5} />}
+        <Line type="linear" dataKey="avg" stroke={SERIES[0]} strokeWidth={2}
+          dot={{ r: 4, strokeWidth: 2, stroke: "#fff", fill: SERIES[0] }} activeDot={{ r: 6 }} />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}
+
+/** One bar per period (week/month), labels already formatted. */
+export function PeriodBars({ data, name, color = SERIES[0], money: isMoney = false }: {
+  data: { label: string; value: number }[]; name: string; color?: string; money?: boolean;
+}) {
+  if (!data.length) return <Empty />;
+  return (
+    <ResponsiveContainer>
+      <BarChart data={data} barCategoryGap="25%">
+        {grid}
+        <XAxis dataKey="label" {...axis} reversed />
+        <YAxis {...axis} allowDecimals={false} orientation="right" tickFormatter={n} width={isMoney ? 80 : 40} />
+        <Tooltip {...tip} formatter={(v) => [isMoney ? egp(v) : n(v), name]} />
+        <Bar dataKey="value" name={name} fill={color} radius={[4, 4, 0, 0]} maxBarSize={36} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
 function Empty() {
   return <div dir="rtl" className="grid h-full place-items-center text-sm text-slate-400">مفيش بيانات في الفترة دي</div>;
 }

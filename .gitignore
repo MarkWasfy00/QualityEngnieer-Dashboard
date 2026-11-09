@@ -45,3 +45,9 @@ prisma/dev.db
 prisma/dev.db-journal
 prisma/dev.db.bak*
 !.env.example
+
+# uploaded Excel files (receivables imports)
+/data/
+
+# sample Excel files with real customer data
+/sample/
