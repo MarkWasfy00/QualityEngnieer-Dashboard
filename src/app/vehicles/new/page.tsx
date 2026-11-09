@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/PageHeader";
 import RecordForm from "@/components/RecordForm";
 import { vehicleFields } from "../fields";
 import { branchOptions, storageNames } from "@/lib/actions-util";

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/PageHeader";
+import { Card, CardContent } from "@/components/ui/card";
 import BulkVisitForm from "@/components/BulkVisitForm";
 import { salesmanOptions } from "@/lib/actions-util";
 import { VISIT_SOURCES } from "@/lib/constants";
@@ -14,9 +15,11 @@ export default async function BulkVisits() {
       {salesmen.length ? (
         <BulkVisitForm salesmen={salesmen} sources={VISIT_SOURCES} action={createBulkVisits} today={toInputDate(new Date())} />
       ) : (
-        <div className="card max-w-4xl p-8 text-center text-slate-600">
-          لازم تضيف البيّاعين الأول من <Link className="text-brand underline" href="/salesmen/new">صفحة البيّاعين</Link>.
-        </div>
+        <Card className="max-w-4xl">
+          <CardContent className="py-4 text-center text-muted-foreground">
+            لازم تضيف البيّاعين الأول من <Link className="text-primary underline" href="/salesmen/new">صفحة البيّاعين</Link>.
+          </CardContent>
+        </Card>
       )}
     </>
   );

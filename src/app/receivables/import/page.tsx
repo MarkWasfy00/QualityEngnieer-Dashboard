@@ -2,7 +2,10 @@ import Link from "next/link";
 import { BarChart3 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { int } from "@/lib/format";
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import ReceivablesUpload from "@/components/ReceivablesUpload";
 
 const when = (d: Date) => d.toLocaleString("ar-EG-u-nu-latn", { dateStyle: "medium", timeStyle: "short" });
@@ -16,37 +19,37 @@ export default async function ReceivablesImportPage() {
   return (
     <>
       <PageHeader title="رفع ملفات الإكسيل" subtitle={`شيت المديونيات أو قيود المبيعات من أودو · المتسجل حاليًا ${int(total)} صفقة مديونية و ${int(lines)} قيد مبيعات`}>
-        <Link href="/receivables" className="btn-ghost"><BarChart3 size={16} /> أداء التحصيل</Link>
-        <Link href="/sales-report" className="btn-ghost"><BarChart3 size={16} /> تحليل المبيعات</Link>
+        <Button asChild variant="outline"><Link href="/receivables"><BarChart3 /> أداء التحصيل</Link></Button>
+        <Button asChild variant="outline"><Link href="/sales-report"><BarChart3 /> تحليل المبيعات</Link></Button>
       </PageHeader>
       <ReceivablesUpload />
 
-      <div className="card mt-6 overflow-hidden">
-        <div className="border-b border-slate-200 p-4 font-bold text-slate-900">الملفات اللي اترفعت قبل كده</div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-xs text-slate-500">
-              <tr>{["التاريخ", "الملف", "نوع البيانات", "الشيتات", "الصفوف", "جديد", "اتحدّث", "طريقة الرفع"].map((h) => <th key={h} className="px-4 py-3 text-start font-semibold">{h}</th>)}</tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
+      <Card className="mt-6 gap-0 pb-0">
+        <CardHeader className="border-b"><CardTitle>الملفات اللي اترفعت قبل كده</CardTitle></CardHeader>
+        <Table className="[&_td]:px-4 [&_td]:py-2.5 [&_th]:px-4">
+          <TableHeader className="bg-muted/60">
+            <TableRow className="hover:bg-transparent">
+              {["التاريخ", "الملف", "نوع البيانات", "الشيتات", "الصفوف", "جديد", "اتحدّث", "طريقة الرفع"].map((h) => <TableHead key={h} className="text-xs text-muted-foreground">{h}</TableHead>)}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
               {imports.map((i) => (
-                <tr key={i.id}>
-                  <td className="px-4 py-3 whitespace-nowrap">{when(i.createdAt)}</td>
-                  <td className="px-4 py-3">{i.fileName}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">{i.kind === "journal" ? "قيود مبيعات أودو" : "مديونيات"}</td>
-                  <td className="px-4 py-3 text-slate-600">{i.sheets}</td>
-                  <td className="px-4 py-3">{int(i.total)}</td>
-                  <td className="px-4 py-3">{int(i.created)}</td>
-                  <td className="px-4 py-3">{int(i.updated)}</td>
-                  <td className="px-4 py-3">{i.replaced ? "استبدال كامل" : "تحديث وإضافة"}</td>
-                </tr>
+                <TableRow key={i.id}>
+                  <TableCell>{when(i.createdAt)}</TableCell>
+                  <TableCell className="whitespace-normal">{i.fileName}</TableCell>
+                  <TableCell>{i.kind === "journal" ? "قيود مبيعات أودو" : "مديونيات"}</TableCell>
+                  <TableCell className="whitespace-normal text-muted-foreground">{i.sheets}</TableCell>
+                  <TableCell>{int(i.total)}</TableCell>
+                  <TableCell>{int(i.created)}</TableCell>
+                  <TableCell>{int(i.updated)}</TableCell>
+                  <TableCell>{i.replaced ? "استبدال كامل" : "تحديث وإضافة"}</TableCell>
+                </TableRow>
               ))}
-              {!imports.length && <tr><td colSpan={8} className="px-4 py-10 text-center text-slate-400">لسه مفيش ملفات اترفعت.</td></tr>}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <p className="mt-2 text-xs text-slate-500">نسخة من كل ملف بتتحفظ في فولدر data/uploads جوه البرنامج.</p>
+              {!imports.length && <TableRow className="hover:bg-transparent"><TableCell colSpan={8} className="py-10 text-center text-muted-foreground">لسه مفيش ملفات اترفعت.</TableCell></TableRow>}
+          </TableBody>
+        </Table>
+      </Card>
+      <p className="mt-2 text-xs text-muted-foreground">نسخة من كل ملف بتتحفظ في فولدر data/uploads جوه البرنامج.</p>
     </>
   );
 }

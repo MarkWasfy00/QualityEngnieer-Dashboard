@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/PageHeader";
 import InspectionForm from "@/components/InspectionForm";
 import { vehicleOptions } from "@/lib/actions-util";
 import { toInputDate } from "@/lib/format";

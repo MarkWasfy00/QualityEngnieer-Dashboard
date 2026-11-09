@@ -6,7 +6,10 @@ import CompareTable from "@/components/CompareTable";
 import { getReportData, parseRange } from "@/lib/kpis";
 import { compareSalesmen, monthlySales, pickSalesmen, MAX_COMPARE } from "@/lib/compare";
 import { pct, int } from "@/lib/format";
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/PageHeader";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import RangeFilter from "@/components/RangeFilter";
 import SalesmanPicker from "@/components/SalesmanPicker";
 import { ChartCard, MultiLine, SERIES } from "@/components/Charts";
@@ -24,15 +27,17 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
   return (
     <>
       <PageHeader title="مقارنة البيّاعين" subtitle="مقارنة جنب بعض: الزيارات، نسبة البيع، المبيعات، التسليم، والشكاوى">
-        <Link href="/workers" className="btn-ghost">رجوع لأداء العمال</Link>
+        <Button asChild variant="outline"><Link href="/workers">رجوع لأداء العمال</Link></Button>
         <ExportButtons pdfHref={`/api/export/pdf?${q}`} xlsxHref={`/api/export/excel?${q}`} />
       </PageHeader>
       <div className="mb-4"><Suspense><RangeFilter /></Suspense></div>
 
       {!all.length ? (
-        <div className="card p-10 text-center text-slate-500">
-          لسه مفيش بيانات للبيّاعين. سجّل <Link className="text-brand underline" href="/visits/new">زيارات العملاء</Link> و<Link className="text-brand underline" href="/sales/new">المبيعات</Link> الأول.
-        </div>
+        <Card>
+          <CardContent className="py-6 text-center text-muted-foreground">
+            لسه مفيش بيانات للبيّاعين. سجّل <Link className="text-primary underline" href="/visits/new">زيارات العملاء</Link> و<Link className="text-primary underline" href="/sales/new">المبيعات</Link> الأول.
+          </CardContent>
+        </Card>
       ) : (
         <>
           <Suspense><SalesmanPicker all={all.map((x) => x.name)} selected={names} max={MAX_COMPARE} colors={SERIES} /></Suspense>
@@ -41,23 +46,25 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
             {list.map((x, i) => {
               const lead = leaders.includes(i) && list.length > 1;
               return (
-                <div key={x.name} className={`card p-5 ${lead ? "ring-2 ring-amber-400" : ""}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 font-bold text-slate-900">
-                      <span className="h-3 w-3 rounded-full" style={{ background: SERIES[i] }} /> {x.name}
+                <Card key={x.name} className={lead ? "ring-2 ring-amber-400" : ""}>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-base font-bold">
+                        <span className="size-3 rounded-full" style={{ background: SERIES[i] }} /> {x.name}
+                      </div>
+                      {lead && <Badge className="bg-amber-100 font-bold text-amber-800"><Crown /> الأفضل إجمالاً</Badge>}
                     </div>
-                    {lead && <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-800"><Crown size={12} /> الأفضل إجمالاً</span>}
-                  </div>
-                  <div className="mt-3 text-3xl font-bold">{pct(x.conversionRate)}</div>
-                  <div className="text-xs text-slate-500">نسبة البيع: اشترى {int(x.won)} من {int(x.visits)} زيارة</div>
-                  <div className="mt-3 text-sm text-slate-600">كسب في <b className="text-slate-900">{int(wins[i])}</b> من {int(rows.length)} مقياس</div>
-                </div>
+                    <div className="mt-3 text-3xl font-bold">{pct(x.conversionRate)}</div>
+                    <div className="text-xs text-muted-foreground">نسبة البيع: اشترى {int(x.won)} من {int(x.visits)} زيارة</div>
+                    <div className="mt-3 text-sm text-muted-foreground">كسب في <b className="text-foreground">{int(wins[i])}</b> من {int(rows.length)} مقياس</div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
 
           <div className="mt-4"><CompareTable names={names} rows={rows} colors={SERIES} /></div>
-          <p className="mt-2 text-xs text-slate-500">&quot;الأفضل&quot; بيتحدد لكل مقياس لوحده (لو كله متساوي مفيش أفضل). &quot;الأفضل إجمالاً&quot; هو اللي كسب في أكبر عدد من المقاييس.</p>
+          <p className="mt-2 text-xs text-muted-foreground">&quot;الأفضل&quot; بيتحدد لكل مقياس لوحده (لو كله متساوي مفيش أفضل). &quot;الأفضل إجمالاً&quot; هو اللي كسب في أكبر عدد من المقاييس.</p>
 
           <div className="mt-4">
             <ChartCard title="المبيعات كل شهر" subtitle="إجمالي قيمة المبيعات لكل بيّاع بالجنيه">

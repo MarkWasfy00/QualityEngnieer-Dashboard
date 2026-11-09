@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db";
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/PageHeader";
+import StatCard from "@/components/StatCard";
+import { Button } from "@/components/ui/button";
 import DataTable, { type Column } from "@/components/DataTable";
 import VisitsPrintBar from "@/components/VisitsPrintBar";
 import Link from "next/link";
@@ -27,11 +29,11 @@ export default async function VisitsPage() {
   return (
     <>
       <PageHeader title="زيارات العملاء" subtitle="كل عميل زار المعرض أو اتصل، ومين البيّاع اللي خدمه، والنتيجة" newHref="/visits/new">
-        <Link href="/visits/bulk" className="btn-dark"><Layers size={16} /> إضافة بالجملة</Link>
+        <Button asChild variant="secondary"><Link href="/visits/bulk"><Layers /> إضافة بالجملة</Link></Button>
       </PageHeader>
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-5">
         {[["إجمالي الزيارات", int(tot.all)], ["اشترى", int(tot.Won)], ["لسه بيفكر", int(tot.FollowUp)], ["مشتراش", int(tot.Lost)], ["نسبة البيع", pct(tot.all ? (tot.Won / tot.all) * 100 : 0)]].map(([k, v]) => (
-          <div key={k} className="card p-4"><div className="text-xs text-slate-500">{k}</div><div className="mt-1 text-2xl font-bold">{v}</div></div>
+          <StatCard key={k} title={k} value={v} />
         ))}
       </div>
       <VisitsPrintBar salesmen={salesmen.map((m) => ({ value: m.id, label: m.active ? m.name : `${m.name} (موقوف)` }))} />

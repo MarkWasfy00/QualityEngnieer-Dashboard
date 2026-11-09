@@ -1,10 +1,14 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { Crown, FileDown, Building2 } from "lucide-react";
+import { AlertTriangle, Crown, FileDown, Building2 } from "lucide-react";
 import { getReportData, parseRange } from "@/lib/kpis";
 import { compareBranches } from "@/lib/compare";
 import { pct, int, num } from "@/lib/format";
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/PageHeader";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import RangeFilter from "@/components/RangeFilter";
 import CompareTable from "@/components/CompareTable";
 import { ChartCard, HBar, SERIES } from "@/components/Charts";
@@ -22,23 +26,28 @@ export default async function BranchQualityPage({ searchParams }: { searchParams
   return (
     <>
       <PageHeader title="جودة الفروع" subtitle="مقارنة الفروع في الجودة والصيانة ورضا العملاء والمبيعات">
-        <Link href="/branches" className="btn-ghost"><Building2 size={16} /> إدارة الفروع</Link>
-        <a href={`/api/export/excel?${q}`} className="btn-dark"><FileDown size={16} /> إكسيل</a>
-        <a href={`/api/export/pdf?${q}`} className="btn-dark"><FileDown size={16} /> PDF</a>
+        <Button asChild variant="outline"><Link href="/branches"><Building2 /> إدارة الفروع</Link></Button>
+        <Button asChild variant="secondary"><a href={`/api/export/excel?${q}`}><FileDown /> إكسيل</a></Button>
+        <Button asChild variant="secondary"><a href={`/api/export/pdf?${q}`}><FileDown /> PDF</a></Button>
       </PageHeader>
       <div className="mb-4"><Suspense><RangeFilter /></Suspense></div>
 
       {!real.length && (
-        <div className="card mb-4 p-6 text-center text-slate-600">
-          لسه مفيش فروع متسجلة. ضيف الفروع من <Link className="text-brand underline" href="/branches/new">صفحة الفروع</Link>، وبعدين اختار الفرع لكل عربية وبيّاع.
-        </div>
+        <Card className="mb-4">
+          <CardContent className="py-2 text-center text-muted-foreground">
+            لسه مفيش فروع متسجلة. ضيف الفروع من <Link className="text-primary underline" href="/branches/new">صفحة الفروع</Link>، وبعدين اختار الفرع لكل عربية وبيّاع.
+          </CardContent>
+        </Card>
       )}
       {unassigned && (
-        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+        <Alert className="mb-4 border-amber-200 bg-amber-50 text-amber-800">
+          <AlertTriangle />
+          <AlertDescription className="text-amber-800">
           {unassigned.vehicles > 0
             ? <>فيه {int(unassigned.vehicles)} عربية من غير فرع، وبياناتهم ظاهرة تحت &quot;بدون فرع&quot;. حدد الفرع لكل عربية من <Link className="underline" href="/vehicles">صفحة العربيات</Link> عشان المقارنة تبقى دقيقة.</>
             : <>فيه بيانات من غير فرع ({int(unassigned.complaints)} شكوى · {int(unassigned.visits)} زيارة · {int(unassigned.sales)} بيعة) ظاهرة تحت &quot;بدون فرع&quot;. حدد الفرع في <Link className="underline" href="/complaints">الشكاوى</Link> أو للبيّاع من <Link className="underline" href="/salesmen">صفحة البيّاعين</Link>.</>}
-        </div>
+          </AlertDescription>
+        </Alert>
       )}
 
       {list.length > 0 && (
@@ -47,28 +56,30 @@ export default async function BranchQualityPage({ searchParams }: { searchParams
             {list.map((b, i) => {
               const lead = leaders.includes(i) && list.length > 1;
               return (
-                <div key={b.id} className={`card p-5 ${lead ? "ring-2 ring-amber-400" : ""} ${b.unassigned ? "border-dashed" : ""}`}>
+                <Card key={b.id} className={`${lead ? "ring-2 ring-amber-400" : ""} ${b.unassigned ? "border border-dashed border-input ring-0" : ""}`}>
+                  <CardContent>
                   <div className="flex items-center justify-between gap-2">
-                    <div className="font-bold text-slate-900">{b.name}</div>
-                    {lead && <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-800"><Crown size={12} /> الأفضل</span>}
+                    <div className="text-base font-bold">{b.name}</div>
+                    {lead && <Badge className="bg-amber-100 font-bold text-amber-800"><Crown /> الأفضل</Badge>}
                   </div>
                   <div className="mt-3 text-3xl font-bold">{b.inspections ? pct(b.firstPassYield) : "—"}</div>
-                  <div className="text-xs text-slate-500">نسبة النجاح من أول مرة · {int(b.inspections)} فحص</div>
+                  <div className="text-xs text-muted-foreground">نسبة النجاح من أول مرة · {int(b.inspections)} فحص</div>
                   <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
-                    <div className="rounded-lg bg-slate-50 p-2"><div className="font-bold text-slate-900">{int(b.vehicles)}</div>عربية</div>
-                    <div className="rounded-lg bg-slate-50 p-2"><div className="font-bold text-slate-900">{int(b.openDefects)}</div>عيب مفتوح</div>
-                    <div className="rounded-lg bg-slate-50 p-2"><div className="font-bold text-slate-900">{b.rated ? num(b.csat) : "—"}</div>رضا العملاء</div>
+                    <div className="rounded-lg bg-muted/60 p-2"><div className="font-bold text-foreground">{int(b.vehicles)}</div>عربية</div>
+                    <div className="rounded-lg bg-muted/60 p-2"><div className="font-bold text-foreground">{int(b.openDefects)}</div>عيب مفتوح</div>
+                    <div className="rounded-lg bg-muted/60 p-2"><div className="font-bold text-foreground">{b.rated ? num(b.csat) : "—"}</div>رضا العملاء</div>
                   </div>
                   {b.unassigned
-                    ? <div className="mt-3 text-xs text-slate-500">للعلم بس — مش داخل في المقارنة</div>
-                    : <div className="mt-3 text-sm text-slate-600">كسب في <b className="text-slate-900">{int(wins[i])}</b> من {int(rows.length)} مقياس</div>}
-                </div>
+                    ? <div className="mt-3 text-xs text-muted-foreground">للعلم بس — مش داخل في المقارنة</div>
+                    : <div className="mt-3 text-sm text-muted-foreground">كسب في <b className="text-foreground">{int(wins[i])}</b> من {int(rows.length)} مقياس</div>}
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
 
           <div className="mt-4"><CompareTable names={names} rows={rows} firstHeader="المقياس / الفرع" /></div>
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-muted-foreground">
             الفحص والعيوب والصيانة بتتحسب على فرع العربية. الشكوى على الفرع المكتوب فيها، ولو مش مكتوب يبقى فرع العربية. المبيعات على فرع العربية، والزيارات على فرع البيّاع.
             &quot;عيوب لكل عربية&quot; و&quot;شكاوى لكل 100 عربية&quot; بيتحسبوا على عدد العربيات الحالي في الفرع.
           </p>

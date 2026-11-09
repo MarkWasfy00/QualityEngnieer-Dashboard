@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { toDefaults } from "@/lib/format";
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/PageHeader";
 import RecordForm from "@/components/RecordForm";
 import { vehicleFields } from "../../fields";
 import { branchOptions, storageNames } from "@/lib/actions-util";

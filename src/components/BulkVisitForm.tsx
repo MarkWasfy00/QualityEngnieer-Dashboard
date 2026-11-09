@@ -2,6 +2,12 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Textarea } from "@/components/ui/textarea";
 import type { FormState } from "./RecordForm";
 
 const n = (v: string) => Math.max(0, Math.floor(Number(v) || 0));
@@ -23,46 +29,48 @@ export default function BulkVisitForm({ salesmen, sources, action, today }: {
   const err = (k: string) => state?.errors?.[k]?.[0];
 
   return (
-    <form action={formAction} className="card max-w-4xl space-y-6 p-6">
+    <Card className="max-w-4xl">
+      <CardContent>
+    <form action={formAction} className="space-y-6">
       <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">البيّاع <span className="text-red-500">*</span></label>
-          <select name="salesmanId" className="input" required defaultValue="">
-            <option value="" disabled>اختار البيّاع…</option>
-            {salesmen.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
-          </select>
-          {err("salesmanId") && <p className="mt-1 text-xs text-red-600">{err("salesmanId")}</p>}
+          <Label htmlFor="salesmanId" className="mb-1.5">البيّاع <span className="text-destructive">*</span></Label>
+          <NativeSelect id="salesmanId" name="salesmanId" className="w-full" required defaultValue="">
+            <NativeSelectOption value="" disabled>اختار البيّاع…</NativeSelectOption>
+            {salesmen.map((m) => <NativeSelectOption key={m.value} value={m.value}>{m.label}</NativeSelectOption>)}
+          </NativeSelect>
+          {err("salesmanId") && <p className="mt-1 text-xs text-destructive">{err("salesmanId")}</p>}
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">التاريخ <span className="text-red-500">*</span></label>
-          <input type="date" name="visitDate" className="input" defaultValue={today} required />
-          <p className="mt-1 text-xs text-slate-500">مثلاً آخر يوم في الأسبوع أو الشهر اللي بتسجله</p>
+          <Label htmlFor="visitDate" className="mb-1.5">التاريخ <span className="text-destructive">*</span></Label>
+          <Input id="visitDate" type="date" name="visitDate" defaultValue={today} required />
+          <p className="mt-1 text-xs text-muted-foreground">مثلاً آخر يوم في الأسبوع أو الشهر اللي بتسجله</p>
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">العملاء جم منين؟</label>
-          <select name="source" className="input" defaultValue="أخرى">
-            {sources.map((x) => <option key={x}>{x}</option>)}
-          </select>
+          <Label htmlFor="source" className="mb-1.5">العملاء جم منين؟</Label>
+          <NativeSelect id="source" name="source" className="w-full" defaultValue="أخرى">
+            {sources.map((x) => <NativeSelectOption key={x}>{x}</NativeSelectOption>)}
+          </NativeSelect>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <div className="rounded-xl border border-slate-200 p-4">
-          <label className="mb-1.5 block text-sm font-bold text-slate-800">عدد الزيارات <span className="text-red-500">*</span></label>
-          <input type="number" min={1} name="total" className="input text-lg font-bold" placeholder="مثلاً 88" value={total} onChange={(e) => setTotal(e.target.value)} required />
-          {err("total") && <p className="mt-1 text-xs text-red-600">{err("total")}</p>}
+        <div className="rounded-xl border p-4">
+          <Label htmlFor="total" className="mb-1.5 font-bold">عدد الزيارات <span className="text-destructive">*</span></Label>
+          <Input id="total" type="number" min={1} name="total" className="h-10 bg-card text-lg font-bold md:text-lg" placeholder="مثلاً 88" value={total} onChange={(e) => setTotal(e.target.value)} required />
+          {err("total") && <p className="mt-1 text-xs text-destructive">{err("total")}</p>}
         </div>
         <div className="rounded-xl border border-green-200 bg-green-50/50 p-4">
-          <label className="mb-1.5 block text-sm font-bold text-green-800">اشترى</label>
-          <input type="number" min={0} name="won" className="input text-lg font-bold" placeholder="0" value={won} onChange={(e) => setWon(e.target.value)} />
+          <Label htmlFor="won" className="mb-1.5 font-bold text-green-800">اشترى</Label>
+          <Input id="won" type="number" min={0} name="won" className="h-10 bg-card text-lg font-bold md:text-lg" placeholder="0" value={won} onChange={(e) => setWon(e.target.value)} />
         </div>
         <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4">
-          <label className="mb-1.5 block text-sm font-bold text-amber-800">لسه بيفكر</label>
-          <input type="number" min={0} name="followUp" className="input text-lg font-bold" placeholder="0" value={follow} onChange={(e) => setFollow(e.target.value)} />
+          <Label htmlFor="followUp" className="mb-1.5 font-bold text-amber-800">لسه بيفكر</Label>
+          <Input id="followUp" type="number" min={0} name="followUp" className="h-10 bg-card text-lg font-bold md:text-lg" placeholder="0" value={follow} onChange={(e) => setFollow(e.target.value)} />
         </div>
-        <div className={`rounded-xl border p-4 ${over ? "border-red-300 bg-red-50" : "border-slate-200 bg-slate-50"}`}>
+        <div className={`rounded-xl border p-4 ${over ? "border-red-300 bg-red-50" : "bg-muted/60"}`}>
           <div className="mb-1.5 text-sm font-bold text-red-800">مشتراش (بيتحسب لوحده)</div>
-          <div className={`py-2 text-2xl font-bold ${over ? "text-red-600" : "text-slate-800"}`}>{over ? "!" : fmt(Math.max(0, lost))}</div>
+          <div className={`py-2 text-2xl font-bold ${over ? "text-destructive" : "text-foreground"}`}>{over ? "!" : fmt(Math.max(0, lost))}</div>
         </div>
       </div>
 
@@ -76,15 +84,17 @@ export default function BulkVisitForm({ salesmen, sources, action, today }: {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium text-slate-700">ملاحظات</label>
-        <textarea name="notes" rows={2} className="input" placeholder="مثلاً: زيارات أسبوع المعرض" />
+        <Label htmlFor="notes" className="mb-1.5">ملاحظات</Label>
+        <Textarea id="notes" name="notes" rows={2} placeholder="مثلاً: زيارات أسبوع المعرض" />
       </div>
 
-      {state?.message && <p className="text-sm text-red-600">{state.message}</p>}
-      <div className="flex items-center gap-3 border-t border-slate-100 pt-5">
-        <button type="submit" disabled={pending || over} className="btn-primary"><Save size={16} /> {pending ? "جاري الحفظ…" : "حفظ الزيارات"}</button>
-        <Link href="/visits" className="btn-ghost">إلغاء</Link>
+      {state?.message && <p className="text-sm text-destructive">{state.message}</p>}
+      <div className="flex items-center gap-3 border-t pt-5">
+        <Button type="submit" disabled={pending || over}><Save /> {pending ? "جاري الحفظ…" : "حفظ الزيارات"}</Button>
+        <Button asChild variant="outline"><Link href="/visits">إلغاء</Link></Button>
       </div>
     </form>
+      </CardContent>
+    </Card>
   );
 }

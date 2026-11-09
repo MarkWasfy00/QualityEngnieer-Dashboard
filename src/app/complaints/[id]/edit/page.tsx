@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { toDefaults } from "@/lib/format";
 import { vehicleOptions, branchOptions } from "@/lib/actions-util";
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/PageHeader";
 import RecordForm from "@/components/RecordForm";
 import { fields } from "../../fields";
 import { updateComplaint, deleteComplaint } from "../../actions";

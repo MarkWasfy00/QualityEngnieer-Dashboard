@@ -1,5 +1,7 @@
 "use client";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const PRESETS = [
   { label: "آخر 30 يوم", days: 30 }, { label: "آخر 90 يوم", days: 90 }, { label: "السنة دي", days: -1 }, { label: "كل الفترات", days: 0 },
@@ -27,12 +29,12 @@ export default function RangeFilter() {
   return (
     <div className="flex flex-wrap items-center gap-2">
       {PRESETS.map((p) => (
-        <button key={p.label} onClick={() => preset(p.days)} className="btn-ghost !px-3 !py-1.5 text-xs">{p.label}</button>
+        <Button key={p.label} variant="outline" onClick={() => preset(p.days)}>{p.label}</Button>
       ))}
-      <span className="text-sm text-slate-500">من</span>
-      <input type="date" className="input !w-auto !py-1.5" value={from} onChange={(e) => go(e.target.value, to)} />
-      <span className="text-slate-400">لحد</span>
-      <input type="date" className="input !w-auto !py-1.5" value={to} onChange={(e) => go(from, e.target.value)} />
+      <span className="text-sm text-muted-foreground">من</span>
+      <Input type="date" aria-label="من" className="w-auto bg-card" value={from} onChange={(e) => go(e.target.value, to)} />
+      <span className="text-sm text-muted-foreground">لحد</span>
+      <Input type="date" aria-label="لحد" className="w-auto bg-card" value={to} onChange={(e) => go(from, e.target.value)} />
     </div>
   );
 }

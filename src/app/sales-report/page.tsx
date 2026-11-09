@@ -4,7 +4,12 @@ import { Upload, FileDown } from "lucide-react";
 import { parseRange } from "@/lib/kpis";
 import { getSalesStats, type SalesGroup } from "@/lib/sales-journal/stats";
 import { money, pct, int, fmtDate } from "@/lib/format";
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/PageHeader";
+import StatCard from "@/components/StatCard";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardAction, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import RangeFilter from "@/components/RangeFilter";
 import RecFilters from "@/components/RecFilters";
 import DataTable, { type Column } from "@/components/DataTable";
@@ -12,45 +17,36 @@ import { ChartCard, PeriodBars, SERIES } from "@/components/Charts";
 
 type SP = { from?: string; to?: string; branch?: string; brand?: string };
 
-function Tile({ title, value, sub, tone }: { title: string; value: string; sub?: string; tone?: "good" | "bad" }) {
-  return (
-    <div className="card p-5">
-      <div className="text-sm text-slate-500">{title}</div>
-      <div className={`mt-2 text-2xl font-bold ${tone === "good" ? "text-emerald-700" : tone === "bad" ? "text-red-700" : "text-slate-900"}`}>{value}</div>
-      {sub && <div className="mt-1 text-xs text-slate-500">{sub}</div>}
-    </div>
-  );
-}
+const Tile = ({ sub, ...props }: Omit<React.ComponentProps<typeof StatCard>, "hint"> & { sub?: string }) => <StatCard hint={sub} {...props} />;
 
-const marginTone = (m: number | null) => (m == null ? "text-slate-400" : m >= 5 ? "text-emerald-700" : m >= 0 ? "text-amber-700" : "text-red-700");
+const marginTone = (m: number | null) => (m == null ? "text-muted-foreground" : m >= 5 ? "text-emerald-700" : m >= 0 ? "text-amber-700" : "text-red-700");
 
 function GroupTable({ title, rows, limit = 50 }: { title: string; rows: SalesGroup[]; limit?: number }) {
   return (
-    <div className="card overflow-hidden">
-      <div className="border-b border-slate-200 p-4 font-bold text-slate-900">{title}</div>
-      <div className="max-h-[440px] overflow-auto">
-        <table className="w-full text-sm">
-          <thead className="sticky top-0 bg-slate-50 text-xs text-slate-500">
-            <tr>{["الاسم", "عربيات", "% من المبيعات", "الإيرادات", "متوسط السعر", "الربح", "هامش الربح", "بخسارة"].map((h) =>
-              <th key={h} className="px-3 py-2.5 text-start font-semibold whitespace-nowrap">{h}</th>)}</tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
+    <Card className="gap-0 pb-0">
+      <CardHeader className="border-b"><CardTitle>{title}</CardTitle></CardHeader>
+      <Table containerClassName="max-h-[440px] overflow-auto" className="[&_td]:px-4 [&_th]:px-4">
+        <TableHeader className="sticky top-0 z-10 bg-muted">
+          <TableRow className="hover:bg-transparent">
+            {["الاسم", "عربيات", "% من المبيعات", "الإيرادات", "متوسط السعر", "الربح", "هامش الربح", "بخسارة"].map((h) => <TableHead key={h} className="text-xs text-muted-foreground">{h}</TableHead>)}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
             {rows.slice(0, limit).map((g) => (
-              <tr key={g.name} className="hover:bg-slate-50/70">
-                <td className="px-3 py-2 font-medium">{g.name}</td>
-                <td className="px-3 py-2">{int(g.cars)}</td>
-                <td className="px-3 py-2 font-semibold">{pct(g.share)}</td>
-                <td className="px-3 py-2 whitespace-nowrap">{money(g.revenue)}</td>
-                <td className="px-3 py-2 whitespace-nowrap">{money(g.avgPrice)}</td>
-                <td className="px-3 py-2 whitespace-nowrap">{money(g.profit)}</td>
-                <td className={`px-3 py-2 font-semibold ${marginTone(g.margin)}`}>{g.margin == null ? "—" : pct(g.margin)}</td>
-                <td className={`px-3 py-2 ${g.losses ? "font-semibold text-red-700" : "text-slate-400"}`}>{int(g.losses)}</td>
-              </tr>
+              <TableRow key={g.name}>
+                <TableCell className="font-medium">{g.name}</TableCell>
+                <TableCell>{int(g.cars)}</TableCell>
+                <TableCell className="font-semibold">{pct(g.share)}</TableCell>
+                <TableCell className="whitespace-nowrap">{money(g.revenue)}</TableCell>
+                <TableCell className="whitespace-nowrap">{money(g.avgPrice)}</TableCell>
+                <TableCell className="whitespace-nowrap">{money(g.profit)}</TableCell>
+                <TableCell className={`font-semibold ${marginTone(g.margin)}`}>{g.margin == null ? "—" : pct(g.margin)}</TableCell>
+                <TableCell className={`${g.losses ? "font-semibold text-red-700" : "text-muted-foreground"}`}>{int(g.losses)}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+        </TableBody>
+      </Table>
+    </Card>
   );
 }
 
@@ -76,14 +72,16 @@ export default async function SalesReportPage({ searchParams }: { searchParams: 
   return (
     <>
       <PageHeader title="تحليل المبيعات" subtitle="من قيود المبيعات في أودو: اتباع كام عربية، بكام، والربح قد إيه">
-        {d.total > 0 && <a href={`/api/export/sales-report${q ? `?${q}` : ""}`} target="_blank" className="btn-dark"><FileDown size={16} /> تقرير PDF</a>}
-        <Link href="/receivables/import" className="btn-primary"><Upload size={16} /> رفع ملف جديد</Link>
+        {d.total > 0 && <Button asChild variant="secondary"><a href={`/api/export/sales-report${q ? `?${q}` : ""}`} target="_blank"><FileDown /> تقرير PDF</a></Button>}
+        <Button asChild><Link href="/receivables/import"><Upload /> رفع ملف جديد</Link></Button>
       </PageHeader>
 
       {!d.total ? (
-        <div className="card p-10 text-center text-slate-600">
-          لسه مفيش قيود مبيعات. صدّر &quot;عنصر اليومية&quot; من أودو و<Link href="/receivables/import" className="text-brand underline">ارفعه هنا</Link>.
-        </div>
+        <Card>
+          <CardContent className="py-6 text-center text-muted-foreground">
+            لسه مفيش قيود مبيعات. صدّر &quot;عنصر اليومية&quot; من أودو و<Link href="/receivables/import" className="text-primary underline">ارفعه هنا</Link>.
+          </CardContent>
+        </Card>
       ) : (
         <>
           <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -91,8 +89,9 @@ export default async function SalesReportPage({ searchParams }: { searchParams: 
             <Suspense><RecFilters filters={[{ key: "branch", label: "الفرع", options: d.options.branches }, { key: "brand", label: "الماركة", options: d.options.brands }]} /></Suspense>
           </div>
 
-          <div className="card mb-4 border-s-4 !border-s-brand p-5 text-slate-700">
-            <div className="mb-1 font-bold text-slate-900">إحنا عاملين إزاي؟</div>
+          <Card className="mb-4 border-s-4 border-s-primary">
+            <CardContent>
+            <div className="mb-1 text-base font-bold">إحنا عاملين إزاي؟</div>
             {s.cars ? (
               <p className="leading-7">
                 من {fmtDate(d.period.first)} لحد {fmtDate(d.period.last)} اتباع <b>{int(s.cars)}</b> عربية
@@ -104,7 +103,8 @@ export default async function SalesReportPage({ searchParams }: { searchParams: 
                 {s.returns > 0 && <>فيه {int(s.returns)} مرتجع ({pct(s.returnRate)}). </>}
               </p>
             ) : <p>مفيش مبيعات بالفلاتر دي.</p>}
-          </div>
+            </CardContent>
+          </Card>
 
           <div className="grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))" }}>
             <Tile title="العربيات المتباعة" value={int(s.cars)} sub={`${int(s.returns)} مرتجع · الصافي ${int(s.netCars)}`} />
@@ -116,7 +116,7 @@ export default async function SalesReportPage({ searchParams }: { searchParams: 
             <Tile title="فوائد التقسيط" value={money(s.interest)} sub={`${pct(s.installmentShare)} من العربيات بالتقسيط`} />
           </div>
           {s.costCovered < 99 && (
-            <p className="mt-2 text-xs text-slate-500">الربح محسوب على {pct(s.costCovered)} من العربيات بس — الباقي مالوش تكلفة شاسيه في أودو.</p>
+            <p className="mt-2 text-xs text-muted-foreground">الربح محسوب على {pct(s.costCovered)} من العربيات بس — الباقي مالوش تكلفة شاسيه في أودو.</p>
           )}
 
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
@@ -128,25 +128,25 @@ export default async function SalesReportPage({ searchParams }: { searchParams: 
             </ChartCard>
           </div>
 
-          <div className="card mt-4 p-5">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <h3 className="font-bold text-slate-900">نسبة العربيات المتباعة لكل ماركة · {int(s.cars)} عربية</h3>
-              <div className="flex flex-wrap gap-2 text-xs">
-                {d.byPayment.map((p) => <span key={p.name} className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">{p.name} <b>{pct(p.share)}</b> ({int(p.cars)})</span>)}
-              </div>
-            </div>
-            <div className="mt-4 grid gap-x-8 gap-y-2 md:grid-cols-2">
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle>نسبة العربيات المتباعة لكل ماركة · {int(s.cars)} عربية</CardTitle>
+              <CardAction className="flex flex-wrap gap-2">
+                {d.byPayment.map((p) => <Badge key={p.name} variant="secondary">{p.name} <b>{pct(p.share)}</b> ({int(p.cars)})</Badge>)}
+              </CardAction>
+            </CardHeader>
+            <CardContent className="grid gap-x-8 gap-y-2 md:grid-cols-2">
               {d.byBrand.slice(0, 16).map((b) => (
                 <div key={b.name} className="grid grid-cols-[100px_1fr_120px] items-center gap-3 text-sm">
-                  <span className="truncate text-slate-600">{b.name}</span>
-                  <div className="h-4 rounded bg-slate-100">
-                    <div className="h-4 rounded bg-[#2a78d6]" style={{ width: `${(b.share / (d.byBrand[0]?.share || 1)) * 100}%` }} />
+                  <span className="truncate text-muted-foreground">{b.name}</span>
+                  <div className="h-4 rounded bg-muted">
+                    <div className="h-4 rounded bg-chart-1" style={{ width: `${(b.share / (d.byBrand[0]?.share || 1)) * 100}%` }} />
                   </div>
-                  <span className="whitespace-nowrap text-slate-700"><b>{pct(b.share)}</b> · {int(b.cars)} عربية</span>
+                  <span className="whitespace-nowrap text-foreground/80"><b>{pct(b.share)}</b> · {int(b.cars)} عربية</span>
                 </div>
               ))}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           <div className="mt-4 grid gap-4">
             <GroupTable title="حسب الفرع" rows={d.byBranch} />
@@ -156,7 +156,7 @@ export default async function SalesReportPage({ searchParams }: { searchParams: 
 
           {d.lossRows.length > 0 && (
             <>
-              <h2 className="mb-3 mt-8 text-lg font-bold text-slate-900">عربيات اتباعت بأقل من تكلفتها ({int(d.lossRows.length)})</h2>
+              <h2 className="mb-3 mt-8 text-lg font-bold text-foreground">عربيات اتباعت بأقل من تكلفتها ({int(d.lossRows.length)})</h2>
               <DataTable columns={lossColumns} filters={["branch"]} rows={d.lossRows.map((x) => ({
                 id: x.id, date: x.date.toISOString(), invoiceNo: x.invoiceNo, customer: x.customer, product: x.product, branch: x.branch,
                 price: x.credit, cost: x.chassisCost, loss: x.credit - (x.chassisCost ?? 0),
@@ -165,7 +165,7 @@ export default async function SalesReportPage({ searchParams }: { searchParams: 
           )}
           {d.returnRows.length > 0 && (
             <>
-              <h2 className="mb-3 mt-8 text-lg font-bold text-slate-900">المرتجعات ({int(d.returnRows.length)})</h2>
+              <h2 className="mb-3 mt-8 text-lg font-bold text-foreground">المرتجعات ({int(d.returnRows.length)})</h2>
               <DataTable columns={returnColumns} rows={d.returnRows.map((x) => ({
                 id: x.id, date: x.date.toISOString(), invoiceNo: x.invoiceNo, customer: x.customer, product: x.product, branch: x.branch, value: x.debit,
               }))} />

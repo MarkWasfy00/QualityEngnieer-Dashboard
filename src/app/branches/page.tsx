@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Gauge } from "lucide-react";
 import { prisma } from "@/lib/db";
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/PageHeader";
+import { Button } from "@/components/ui/button";
 import ExportButtons from "@/components/ExportButtons";
 import DataTable, { type Column } from "@/components/DataTable";
 
@@ -24,7 +25,7 @@ export default async function BranchesPage() {
     <>
       <PageHeader title="الفروع" subtitle="فروع المعرض اللي بتختار منها في العربيات والبيّاعين والشكاوى" newHref="/branches/new">
         <ExportButtons section="branches" />
-        <Link href="/branches/quality" className="btn-dark"><Gauge size={16} /> جودة الفروع</Link>
+        <Button asChild variant="secondary"><Link href="/branches/quality"><Gauge /> جودة الفروع</Link></Button>
       </PageHeader>
       <DataTable columns={columns} rows={rows} filters={["status"]} />
     </>

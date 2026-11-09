@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/PageHeader";
 import InspectionForm from "@/components/InspectionForm";
 import { vehicleOptions } from "@/lib/actions-util";
 import { DEFAULT_CHECKLIST } from "@/lib/constants";

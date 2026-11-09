@@ -2,7 +2,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Car, ClipboardCheck, AlertTriangle, Wrench, MessageSquareWarning, FileDown, Users, HandCoins, DoorOpen, BadgeCheck, Building2, Gauge, Wallet, TrendingUp } from "lucide-react";
-import clsx from "clsx";
+import {
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,
+} from "@/components/ui/sidebar";
 
 const NAV = [
   { href: "/", label: "لوحة المتابعة", icon: LayoutDashboard },
@@ -22,39 +24,44 @@ const NAV = [
   { href: "/reports", label: "التقارير والتصدير", icon: FileDown },
 ];
 
-export default function Sidebar() {
+export default function AppSidebar() {
   const path = usePathname();
+  const { setOpenMobile } = useSidebar();
   return (
-    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col bg-navy px-3 py-6 text-slate-300 md:flex">
-      <div className="mb-8 flex items-center gap-2 px-3">
-        <div className="grid h-9 w-9 place-items-center rounded-lg bg-brand text-white"><Car size={20} /></div>
-        <div>
-          <div className="text-sm font-semibold text-white">تحليلات الجودة</div>
-          <div className="text-xs text-slate-400">إدارة الجودة بالمعرض</div>
-        </div>
-      </div>
-      <nav className="space-y-1">
-        {NAV.map(({ href, label, icon: Icon }) => {
-          const active = href === "/" ? path === "/" : path.startsWith(href) && !NAV.some((n) => n.href.length > href.length && n.href.startsWith(href) && path.startsWith(n.href));
-          return (
-            <Link key={href} href={href}
-              className={clsx("flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition",
-                active ? "bg-white/10 text-white" : "hover:bg-white/5 hover:text-white")}>
-              <Icon size={18} /> {label}
-            </Link>
-          );
-        })}
-      </nav>
-    </aside>
-  );
-}
-
-export function MobileNav() {
-  return (
-    <div className="mb-4 flex gap-2 overflow-x-auto md:hidden">
-      {NAV.map((n) => (
-        <Link key={n.href} href={n.href} className="btn-ghost whitespace-nowrap !px-3 !py-1.5 text-xs">{n.label}</Link>
-      ))}
-    </div>
+    <Sidebar side="right" dir="rtl" collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/" onClick={() => setOpenMobile(false)}>
+                <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"><Car /></div>
+                <div className="grid flex-1 text-start leading-tight">
+                  <span className="truncate font-semibold text-sidebar-accent-foreground">تحليلات الجودة</span>
+                  <span className="truncate text-xs text-sidebar-foreground/70">إدارة الجودة بالمعرض</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu className="gap-1">
+              {NAV.map(({ href, label, icon: Icon }) => {
+                const active = href === "/" ? path === "/" : path.startsWith(href) && !NAV.some((n) => n.href.length > href.length && n.href.startsWith(href) && path.startsWith(n.href));
+                return (
+                  <SidebarMenuItem key={href}>
+                    <SidebarMenuButton asChild isActive={active} tooltip={{ children: label, side: "left" }}>
+                      <Link href={href} onClick={() => setOpenMobile(false)}><Icon /><span>{label}</span></Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
   );
 }

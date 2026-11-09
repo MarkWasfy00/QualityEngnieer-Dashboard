@@ -2,6 +2,13 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Textarea } from "@/components/ui/textarea";
 
 export type Field = {
   name: string;
@@ -26,59 +33,63 @@ export default function RecordForm({ fields, action, defaults = {}, cancelHref, 
 }) {
   const [state, formAction, pending] = useActionState(action, undefined);
   return (
-    <div className="card max-w-4xl p-6">
-      <form action={formAction} className="grid grid-cols-1 gap-5 md:grid-cols-2">
-        {fields.map((f) => {
-          const err = state?.errors?.[f.name]?.[0];
-          const dv = defaults[f.name];
-          const common = { name: f.name, id: f.name, required: f.required, placeholder: f.placeholder, className: "input", dir: f.ltr ? "ltr" : undefined };
-          return (
-            <div key={f.name} className={f.full || f.type === "textarea" ? "md:col-span-2" : ""}>
-              {f.type === "checkbox" ? (
-                <label className="mt-7 flex items-center gap-2 text-sm font-medium text-slate-700">
-                  <input type="checkbox" name={f.name} defaultChecked={!!dv} className="h-4 w-4 accent-blue-600" /> {f.label}
-                </label>
-              ) : (
-                <>
-                  <label htmlFor={f.name} className="mb-1.5 block text-sm font-medium text-slate-700">
-                    {f.label}{f.required && <span className="text-red-500"> *</span>}
-                  </label>
-                  {f.type === "select" ? (
-                    <select {...common} defaultValue={dv == null ? "" : String(dv)}>
-                      {!f.required && <option value="">—</option>}
-                      {f.options?.map((o) => typeof o === "string"
-                        ? <option key={o} value={o}>{o}</option>
-                        : <option key={o.value} value={o.value}>{o.label}</option>)}
-                    </select>
-                  ) : f.type === "textarea" ? (
-                    <textarea {...common} rows={3} defaultValue={dv == null ? "" : String(dv)} />
-                  ) : (
-                    <>
-                      <input {...common} type={f.type ?? "text"} step={f.step} defaultValue={dv == null ? "" : String(dv)}
-                        list={f.suggestions?.length ? `${f.name}-list` : undefined} autoComplete="off" />
-                      {f.suggestions?.length ? (
-                        <datalist id={`${f.name}-list`}>{f.suggestions.map((x) => <option key={x} value={x} />)}</datalist>
-                      ) : null}
-                    </>
-                  )}
-                </>
-              )}
-              {err && <p className="mt-1 text-xs text-red-600">{err}</p>}
-            </div>
-          );
-        })}
-        {state?.message && <p className="md:col-span-2 text-sm text-red-600">{state.message}</p>}
-        <div className="md:col-span-2 flex items-center gap-3 border-t border-slate-100 pt-5">
-          <button type="submit" disabled={pending} className="btn-primary"><Save size={16} /> {pending ? "جاري الحفظ…" : "حفظ"}</button>
-          <Link href={cancelHref} className="btn-ghost">إلغاء</Link>
-          {deleteAction && (
-            <button formAction={deleteAction} formNoValidate className="btn-danger ms-auto"
-              onClick={(e) => { if (!confirm("متأكد إنك عايز تمسح السجل ده نهائياً؟")) e.preventDefault(); }}>
-              مسح
-            </button>
-          )}
-        </div>
-      </form>
-    </div>
+    <Card className="max-w-4xl">
+      <CardContent>
+        <form action={formAction} className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          {fields.map((f) => {
+            const err = state?.errors?.[f.name]?.[0];
+            const dv = defaults[f.name];
+            const value = dv == null ? "" : String(dv);
+            const common = { name: f.name, id: f.name, required: f.required, dir: f.ltr ? "ltr" : undefined, "aria-invalid": err ? true : undefined };
+            return (
+              <div key={f.name} className={f.full || f.type === "textarea" ? "md:col-span-2" : ""}>
+                {f.type === "checkbox" ? (
+                  <div className="mt-7 flex items-center gap-2">
+                    <Checkbox id={f.name} name={f.name} defaultChecked={!!dv} />
+                    <Label htmlFor={f.name}>{f.label}</Label>
+                  </div>
+                ) : (
+                  <>
+                    <Label htmlFor={f.name} className="mb-1.5">
+                      {f.label}{f.required && <span className="text-destructive">*</span>}
+                    </Label>
+                    {f.type === "select" ? (
+                      <NativeSelect {...common} className="w-full" defaultValue={value}>
+                        {!f.required && <NativeSelectOption value="">—</NativeSelectOption>}
+                        {f.options?.map((o) => typeof o === "string"
+                          ? <NativeSelectOption key={o} value={o}>{o}</NativeSelectOption>
+                          : <NativeSelectOption key={o.value} value={o.value}>{o.label}</NativeSelectOption>)}
+                      </NativeSelect>
+                    ) : f.type === "textarea" ? (
+                      <Textarea {...common} placeholder={f.placeholder} rows={3} defaultValue={value} />
+                    ) : (
+                      <>
+                        <Input {...common} placeholder={f.placeholder} type={f.type ?? "text"} step={f.step} defaultValue={value}
+                          list={f.suggestions?.length ? `${f.name}-list` : undefined} autoComplete="off" />
+                        {f.suggestions?.length ? (
+                          <datalist id={`${f.name}-list`}>{f.suggestions.map((x) => <option key={x} value={x} />)}</datalist>
+                        ) : null}
+                      </>
+                    )}
+                  </>
+                )}
+                {err && <p className="mt-1 text-xs text-destructive">{err}</p>}
+              </div>
+            );
+          })}
+          {state?.message && <p className="text-sm text-destructive md:col-span-2">{state.message}</p>}
+          <div className="flex items-center gap-3 border-t pt-5 md:col-span-2">
+            <Button type="submit" disabled={pending}><Save /> {pending ? "جاري الحفظ…" : "حفظ"}</Button>
+            <Button asChild variant="outline"><Link href={cancelHref}>إلغاء</Link></Button>
+            {deleteAction && (
+              <Button variant="destructive" formAction={deleteAction} formNoValidate className="ms-auto"
+                onClick={(e) => { if (!confirm("متأكد إنك عايز تمسح السجل ده نهائياً؟")) e.preventDefault(); }}>
+                مسح
+              </Button>
+            )}
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

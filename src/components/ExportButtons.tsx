@@ -1,4 +1,5 @@
 import { FileSpreadsheet, Printer } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 /** PDF (opens for printing) + Excel buttons. `href` builds the URL for a format. */
 export default function ExportButtons({ section, pdfHref, xlsxHref }: { section?: string; pdfHref?: string; xlsxHref?: string }) {
@@ -6,8 +7,8 @@ export default function ExportButtons({ section, pdfHref, xlsxHref }: { section?
   const xlsx = xlsxHref ?? `/api/export/section/${section}?format=xlsx`;
   return (
     <>
-      <a href={pdf} target="_blank" rel="noopener" className="btn-ghost"><Printer size={16} /> PDF</a>
-      <a href={xlsx} className="btn-ghost"><FileSpreadsheet size={16} className="text-green-700" /> إكسيل</a>
+      <Button asChild variant="outline"><a href={pdf} target="_blank" rel="noopener"><Printer /> PDF</a></Button>
+      <Button asChild variant="outline"><a href={xlsx}><FileSpreadsheet className="text-green-700" /> إكسيل</a></Button>
     </>
   );
 }

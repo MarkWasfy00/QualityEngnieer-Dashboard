@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { vehicleLabel } from "@/lib/format";
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/PageHeader";
 import ExportButtons from "@/components/ExportButtons";
 import DataTable, { type Column } from "@/components/DataTable";
 

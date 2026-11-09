@@ -2,6 +2,7 @@
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line,
 } from "recharts";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { label } from "@/lib/constants";
 import { monthLabel } from "@/lib/format";
 
@@ -27,11 +28,13 @@ const legend = { iconType: "circle" as const, wrapperStyle: { fontSize: 12, dire
 
 export function ChartCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <div className="card p-5">
-      <h3 className="font-bold text-slate-900">{title}</h3>
-      {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
-      <div className="mt-4 h-64" dir="ltr">{children}</div>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        {subtitle && <CardDescription>{subtitle}</CardDescription>}
+      </CardHeader>
+      <CardContent><div className="h-64" dir="ltr">{children}</div></CardContent>
+    </Card>
   );
 }
 
@@ -166,5 +169,5 @@ export function PeriodBars({ data, name, color = SERIES[0], money: isMoney = fal
 }
 
 function Empty() {
-  return <div dir="rtl" className="grid h-full place-items-center text-sm text-slate-400">مفيش بيانات في الفترة دي</div>;
+  return <div dir="rtl" className="grid h-full place-items-center text-sm text-muted-foreground">مفيش بيانات في الفترة دي</div>;
 }

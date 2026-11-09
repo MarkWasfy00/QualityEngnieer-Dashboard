@@ -3,7 +3,9 @@ import Link from "next/link";
 import { Trophy, ShieldCheck, Timer, ClipboardCheck, HandCoins, Smile, Target, Scale } from "lucide-react";
 import { getReportData, parseRange } from "@/lib/kpis";
 import { pct, num, int, money } from "@/lib/format";
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/PageHeader";
+import StatCard from "@/components/StatCard";
+import { Button } from "@/components/ui/button";
 import ExportButtons from "@/components/ExportButtons";
 import RangeFilter from "@/components/RangeFilter";
 import DataTable, { type Column } from "@/components/DataTable";
@@ -11,14 +13,8 @@ import { ChartCard, HBar, SERIES } from "@/components/Charts";
 
 const MIN = 3; // minimum jobs before a worker is eligible for "best" highlights
 
-function Highlight({ icon: Icon, title, who, value }: { icon: React.ElementType; title: string; who?: string; value: string }) {
-  return (
-    <div className="card p-5">
-      <div className="flex items-center gap-2 text-sm text-slate-500"><Icon size={16} className="text-brand" /> {title}</div>
-      <div className="mt-2 text-xl font-bold text-slate-900">{who ?? "—"}</div>
-      <div className="mt-1 text-xs text-slate-500">{who ? value : "مفيش بيانات كفاية"}</div>
-    </div>
-  );
+function Highlight({ icon, title, who, value }: { icon: React.ElementType; title: string; who?: string; value: string }) {
+  return <StatCard icon={icon} title={title} value={who ?? "—"} hint={who ? value : "مفيش بيانات كفاية"} valueClassName="text-xl" />;
 }
 
 const techCols: Column[] = [
@@ -99,7 +95,7 @@ export default async function WorkersPage({ searchParams }: { searchParams: Prom
         <Highlight icon={Timer} title="أسرع فني في التسليم" who={fastest?.name} value={`متوسط ${num(fastest?.avgTurnaroundHrs ?? 0)} ساعة`} />
         <Highlight icon={ClipboardCheck} title="أكتر فاحص" who={topInspector?.name} value={`${int(topInspector?.inspections)} فحص · اكتشف ${int(topInspector?.issuesFound)} مشكلة`} />
       </div>
-      <p className="mt-2 text-xs text-slate-500">* الفني لازم يكون عنده {MIN} أوامر شغل على الأقل عشان يدخل في المقارنة.</p>
+      <p className="mt-2 text-xs text-muted-foreground">* الفني لازم يكون عنده {MIN} أوامر شغل على الأقل عشان يدخل في المقارنة.</p>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <ChartCard title="أوامر الشغل لكل فني" subtitle="عدد أوامر الصيانة في الفترة">
@@ -110,7 +106,7 @@ export default async function WorkersPage({ searchParams }: { searchParams: Prom
         </ChartCard>
       </div>
 
-      <h2 className="mb-3 mt-8 text-lg font-bold text-slate-900">المبيعات</h2>
+      <h2 className="mb-3 mt-8 text-lg font-bold text-foreground">المبيعات</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Highlight icon={Target} title="أعلى نسبة بيع من الزيارات" who={bestConv?.name} value={`${pct(bestConv?.conversionRate ?? 0)} · اشترى ${int(bestConv?.won)} من ${int(bestConv?.visits)} زيارة`} />
         <Highlight icon={HandCoins} title="أعلى مبيعات" who={topSeller?.name} value={`${money(topSeller?.totalSales ?? 0)} · ${int(topSeller?.carsSold)} عربية`} />
@@ -118,8 +114,8 @@ export default async function WorkersPage({ searchParams }: { searchParams: Prom
         <Highlight icon={Smile} title="أعلى رضا عملاء" who={bestCsat?.name} value={`${num(bestCsat?.csat ?? 0)} من 5`} />
       </div>
       <div className="mt-2 mb-4 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs text-slate-500">* لازم {MIN} زيارات / عربيات على الأقل عشان البيّاع يدخل في المقارنة. نسبة البيع = الزيارات اللي اشترت ÷ كل الزيارات. الشكاوى بتتحسب على البيّاع اللي باع العربية.</p>
-        <Link href={`/workers/compare${q ? "?" + q : ""}`} className="btn-primary"><Scale size={16} /> قارن بين البيّاعين</Link>
+        <p className="text-xs text-muted-foreground">* لازم {MIN} زيارات / عربيات على الأقل عشان البيّاع يدخل في المقارنة. نسبة البيع = الزيارات اللي اشترت ÷ كل الزيارات. الشكاوى بتتحسب على البيّاع اللي باع العربية.</p>
+        <Button asChild><Link href={`/workers/compare${q ? "?" + q : ""}`}><Scale /> قارن بين البيّاعين</Link></Button>
       </div>
       {w.salesmen.length ? (
         <div className="mb-4"><ChartCard title="إجمالي المبيعات لكل بيّاع" subtitle="بالجنيه المصري">
@@ -127,14 +123,14 @@ export default async function WorkersPage({ searchParams }: { searchParams: Prom
         </ChartCard></div>
       ) : null}
       <DataTable columns={salesCols} rows={rows(w.salesmen)} />
-      {!w.salesmen.length && <p className="mt-2 text-sm text-slate-500">لسه مفيش مبيعات متسجلة. سجّل المبيعات من صفحة <Link className="text-brand underline" href="/sales/new">المبيعات</Link>.</p>}
+      {!w.salesmen.length && <p className="mt-2 text-sm text-muted-foreground">لسه مفيش مبيعات متسجلة. سجّل المبيعات من صفحة <Link className="text-primary underline" href="/sales/new">المبيعات</Link>.</p>}
 
-      <h2 className="mb-3 mt-8 text-lg font-bold text-slate-900">الفنيين</h2>
+      <h2 className="mb-3 mt-8 text-lg font-bold text-foreground">الفنيين</h2>
       <DataTable columns={techCols} rows={rows(w.technicians)} />
-      <h2 className="mb-3 mt-8 text-lg font-bold text-slate-900">الفاحصين</h2>
+      <h2 className="mb-3 mt-8 text-lg font-bold text-foreground">الفاحصين</h2>
       <DataTable columns={inspCols} rows={rows(w.inspectors)} />
-      <h2 className="mb-3 mt-8 text-lg font-bold text-slate-900">أمناء المخزن</h2>
-      <p className="mb-3 text-sm text-slate-500">العيوب اللي اتلاقت على العربيات اللي في عهدة كل أمين مخزن.</p>
+      <h2 className="mb-3 mt-8 text-lg font-bold text-foreground">أمناء المخزن</h2>
+      <p className="mb-3 text-sm text-muted-foreground">العيوب اللي اتلاقت على العربيات اللي في عهدة كل أمين مخزن.</p>
       <DataTable columns={keeperCols} rows={rows(w.keepers)} />
     </>
   );

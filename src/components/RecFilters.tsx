@@ -1,5 +1,6 @@
 "use client";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 
 export type SelectFilter = { key: string; label: string; options: string[] };
 
@@ -16,10 +17,10 @@ export default function RecFilters({ filters }: { filters: SelectFilter[] }) {
   return (
     <div className="flex flex-wrap gap-2">
       {filters.map((f) => (
-        <select key={f.key} className="input !w-auto !py-1.5" value={sp.get(f.key) ?? ""} onChange={(e) => set(f.key, e.target.value)}>
-          <option value="">{f.label}: الكل</option>
-          {f.options.map((o) => <option key={o} value={o}>{o}</option>)}
-        </select>
+        <NativeSelect key={f.key} className="bg-card" aria-label={f.label} value={sp.get(f.key) ?? ""} onChange={(e) => set(f.key, e.target.value)}>
+          <NativeSelectOption value="">{f.label}: الكل</NativeSelectOption>
+          {f.options.map((o) => <NativeSelectOption key={o} value={o}>{o}</NativeSelectOption>)}
+        </NativeSelect>
       ))}
     </div>
   );

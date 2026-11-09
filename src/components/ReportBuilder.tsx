@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
 import { FileSpreadsheet, FileText } from "lucide-react";
-import clsx from "clsx";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 const MODULES = [
   { key: "inspections", label: "الفحوصات" }, { key: "defects", label: "العيوب" },
@@ -16,41 +18,44 @@ export default function ReportBuilder({ initialFrom = "", initialTo = "" }: { in
   const toggle = (k: string) => setMods(mods.includes(k) ? mods.filter((m) => m !== k) : [...mods, k]);
 
   return (
-    <div className="card max-w-3xl p-6 space-y-6">
-      <div>
-        <h2 className="mb-3 font-semibold">1. فترة التقرير</h2>
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="text-slate-400">من</span>
-          <input type="date" className="input !w-auto" value={from} onChange={(e) => setFrom(e.target.value)} />
-          <span className="text-slate-400">لحد</span>
-          <input type="date" className="input !w-auto" value={to} onChange={(e) => setTo(e.target.value)} />
-          {(from || to) && <button className="text-sm text-brand cursor-pointer" onClick={() => { setFrom(""); setTo(""); }}>كل الفترات</button>}
+    <Card className="max-w-3xl">
+      <CardContent className="space-y-6">
+        <div>
+          <h2 className="mb-3 text-base font-semibold">1. فترة التقرير</h2>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-muted-foreground">من</span>
+            <Input type="date" aria-label="من" className="w-auto" value={from} onChange={(e) => setFrom(e.target.value)} />
+            <span className="text-muted-foreground">لحد</span>
+            <Input type="date" aria-label="لحد" className="w-auto" value={to} onChange={(e) => setTo(e.target.value)} />
+            {(from || to) && <Button variant="link" onClick={() => { setFrom(""); setTo(""); }}>كل الفترات</Button>}
+          </div>
         </div>
-      </div>
-      <div>
-        <h2 className="mb-3 font-semibold">2. الأقسام اللي هتدخل في التقرير</h2>
-        <div className="flex flex-wrap gap-2">
-          {MODULES.map((m) => (
-            <button key={m.key} onClick={() => toggle(m.key)}
-              className={clsx("rounded-full border px-4 py-1.5 text-sm font-medium cursor-pointer transition",
-                mods.includes(m.key) ? "border-brand bg-brand text-white" : "border-slate-300 bg-white text-slate-600")}>
-              {m.label}
-            </button>
-          ))}
+        <div>
+          <h2 className="mb-3 text-base font-semibold">2. الأقسام اللي هتدخل في التقرير</h2>
+          <div className="flex flex-wrap gap-2">
+            {MODULES.map((m) => {
+              const on = mods.includes(m.key);
+              return (
+                <Button key={m.key} variant={on ? "default" : "outline"} aria-pressed={on} className="rounded-full px-4" onClick={() => toggle(m.key)}>
+                  {m.label}
+                </Button>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">الملخص والمؤشرات والرسومات موجودين في التقرير دايماً.</p>
         </div>
-        <p className="mt-2 text-xs text-slate-500">الملخص والمؤشرات والرسومات موجودين في التقرير دايماً.</p>
-      </div>
-      <div>
-        <h2 className="mb-3 font-semibold">3. التحميل</h2>
-        <div className="flex flex-wrap gap-3">
-          <a href={`/api/export/excel?${q}`} className="btn !bg-green-700 text-white hover:!bg-green-800 shadow-sm">
-            <FileSpreadsheet size={18} /> تصدير إكسيل (xlsx)
-          </a>
-          <a href={`/api/export/pdf?${q}`} className="btn !bg-red-700 text-white hover:!bg-red-800 shadow-sm">
-            <FileText size={18} /> تصدير PDF
-          </a>
+        <div>
+          <h2 className="mb-3 text-base font-semibold">3. التحميل</h2>
+          <div className="flex flex-wrap gap-3">
+            <Button asChild size="lg" className="bg-green-700 px-4 hover:bg-green-800">
+              <a href={`/api/export/excel?${q}`}><FileSpreadsheet /> تصدير إكسيل (xlsx)</a>
+            </Button>
+            <Button asChild size="lg" className="bg-red-700 px-4 hover:bg-red-800">
+              <a href={`/api/export/pdf?${q}`}><FileText /> تصدير PDF</a>
+            </Button>
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

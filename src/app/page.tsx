@@ -3,21 +3,15 @@ import Link from "next/link";
 import { ClipboardCheck, AlertTriangle, Banknote, RotateCcw, Timer, MessageSquareWarning, Star, FileDown, Hourglass } from "lucide-react";
 import { getReportData, parseRange } from "@/lib/kpis";
 import { money, pct, num, int } from "@/lib/format";
-import { SEVERITY_COLORS, label } from "@/lib/constants";
-import { PageHeader } from "@/components/ui";
+import { PageHeader, StatusBadge } from "@/components/PageHeader";
+import StatCard from "@/components/StatCard";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import ExportButtons from "@/components/ExportButtons";
 import RangeFilter from "@/components/RangeFilter";
 import { ChartCard, HBar, TrendChart, CostChart } from "@/components/Charts";
 
-function Kpi({ icon: Icon, title, value, hint }: { icon: React.ElementType; title: string; value: string; hint?: string }) {
-  return (
-    <div className="card p-5">
-      <div className="flex items-center gap-2 text-sm text-slate-500"><Icon size={16} className="text-brand" /> {title}</div>
-      <div className="mt-2 text-3xl font-bold text-slate-900">{value}</div>
-      {hint && <div className="mt-1 text-xs text-slate-500">{hint}</div>}
-    </div>
-  );
-}
+const Kpi = (props: React.ComponentProps<typeof StatCard>) => <StatCard valueClassName="text-3xl" {...props} />;
 
 export default async function Dashboard({ searchParams }: { searchParams: Promise<{ from?: string; to?: string }> }) {
   const sp = await searchParams;
@@ -27,7 +21,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     <>
       <PageHeader title="لوحة متابعة الجودة" subtitle="الفحص والعيوب والصيانة وشكاوى العملاء في مكان واحد">
         <ExportButtons pdfHref={`/api/export/pdf${q ? "?" + q : ""}`} xlsxHref={`/api/export/excel${q ? "?" + q : ""}`} />
-        <Link href={`/reports${q ? "?" + q : ""}`} className="btn-dark"><FileDown size={16} /> تقرير مخصص</Link>
+        <Button asChild><Link href={`/reports${q ? "?" + q : ""}`}><FileDown /> تقرير مخصص</Link></Button>
       </PageHeader>
       <div className="mb-6"><Suspense><RangeFilter /></Suspense></div>
 
@@ -42,16 +36,17 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         <Kpi icon={Star} title="رضا العملاء" value={`${num(k.csat)} من 5`} hint="متوسط تقييم الشكاوى المقفولة" />
       </div>
 
-      <div className="card mt-4 flex flex-wrap items-center gap-6 p-5">
-        <span className="text-sm font-bold text-slate-700">العيوب حسب الخطورة</span>
-        {b.defectsBySeverity.map((s) => (
-          <div key={s.name} className="flex items-center gap-2">
-            <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
-              style={{ background: `#${SEVERITY_COLORS[s.name].bg}`, color: `#${SEVERITY_COLORS[s.name].fg}` }}>{label(s.name)}</span>
-            <span className="text-lg font-bold">{int(s.value)}</span>
-          </div>
-        ))}
-      </div>
+      <Card className="mt-4">
+        <CardContent className="flex flex-wrap items-center gap-6">
+          <span className="text-sm font-bold">العيوب حسب الخطورة</span>
+          {b.defectsBySeverity.map((s) => (
+            <div key={s.name} className="flex items-center gap-2">
+              <StatusBadge value={s.name} />
+              <span className="text-lg font-bold">{int(s.value)}</span>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <ChartCard title="نتايج الفحص كل شهر" subtitle="عدد المطابق وغير المطابق"><TrendChart data={b.inspectionTrend} /></ChartCard>
