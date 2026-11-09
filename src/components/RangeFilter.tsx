@@ -13,9 +13,9 @@ export default function RangeFilter() {
   const from = sp.get("from") ?? "";
   const to = sp.get("to") ?? "";
   const go = (f: string, t: string) => {
-    const q = new URLSearchParams();
-    if (f) q.set("from", f);
-    if (t) q.set("to", t);
+    const q = new URLSearchParams(sp.toString()); // keep other filters (branch, bank…)
+    if (f) q.set("from", f); else q.delete("from");
+    if (t) q.set("to", t); else q.delete("to");
     router.push(`${path}${q.size ? "?" + q : ""}`);
   };
   const preset = (days: number) => {

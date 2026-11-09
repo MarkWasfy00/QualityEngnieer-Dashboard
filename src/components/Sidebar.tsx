@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Car, ClipboardCheck, AlertTriangle, Wrench, MessageSquareWarning, FileDown, Users, HandCoins, DoorOpen, BadgeCheck, Building2, Gauge } from "lucide-react";
+import { LayoutDashboard, Car, ClipboardCheck, AlertTriangle, Wrench, MessageSquareWarning, FileDown, Users, HandCoins, DoorOpen, BadgeCheck, Building2, Gauge, Wallet, TrendingUp } from "lucide-react";
 import clsx from "clsx";
 
 const NAV = [
@@ -14,6 +14,8 @@ const NAV = [
   { href: "/salesmen", label: "البيّاعين", icon: BadgeCheck },
   { href: "/sales", label: "المبيعات", icon: HandCoins },
   { href: "/visits", label: "زيارات العملاء", icon: DoorOpen },
+  { href: "/sales-report", label: "تحليل المبيعات (أودو)", icon: TrendingUp },
+  { href: "/receivables", label: "المديونيات والتحصيل", icon: Wallet },
   { href: "/workers", label: "أداء العمال", icon: Users },
   { href: "/branches/quality", label: "جودة الفروع", icon: Gauge },
   { href: "/branches", label: "الفروع", icon: Building2 },

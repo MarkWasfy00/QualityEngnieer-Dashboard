@@ -164,3 +164,85 @@ model Branch {
   salesmen   Salesman[]
   complaints Complaint[]
 }
+
+/// One deal row from the receivables (مديونيات) Excel sheet. Re-uploading the sheet updates rows by `key`.
+model Receivable {
+  id                   Int               @id @default(autoincrement())
+  key                  String            @unique // customer | chassis | sale date (+ #n for duplicates)
+  customerName         String
+  status               String? // ملاحظات as written (تم التحصيل / مردودات / ...)
+  state                String            @default("Open") // Open | Collected | Returned
+  collectedAt          DateTime?
+  car                  String?
+  chassis              String?
+  debit                Float? // مدين
+  salePrice            Float? // سعر البيع
+  financeAmount        Float? // مبلغ التمويل
+  downPaymentRemaining Float? // باقى المقدم
+  amountDue            Float             @default(0) // مدين، أو التمويل + باقي المقدم، أو سعر البيع
+  saleDate             DateTime?
+  closingOfficer       String?
+  branch               String?
+  bank                 String?
+  paymentType          String            @default("Bank") // Bank | Cash | Installment
+  salesman             String?
+  remarks              String? // الملاحظات
+  sourceSheet          String?
+  importId             Int?
+  import               ReceivableImport? @relation(fields: [importId], references: [id], onDelete: SetNull)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  @@index([saleDate])
+  @@index([state])
+}
+
+/// History of uploaded receivables workbooks (the original file is kept under data/uploads).
+model ReceivableImport {
+  id         Int          @id @default(autoincrement())
+  fileName   String
+  storedPath String?
+  sheets     String // sheet names that were imported, joined by " · "
+  total      Int          @default(0)
+  created    Int          @default(0)
+  updated    Int          @default(0)
+  skipped    Int          @default(0)
+  kind       String       @default("receivables") // receivables | journal
+  replaced   Boolean      @default(false)
+  warnings   String? // JSON array of short messages
+  createdAt  DateTime     @default(now())
+  rows       Receivable[]
+  lines      SalesLine[]
+}
+
+/// One line of the Odoo sales journal export (عنصر اليومية / account.move.line): a car sale, a return, or installment interest.
+model SalesLine {
+  id          Int               @id @default(autoincrement())
+  key         String            @unique // invoice | chassis | account | kind | amount (+ #n)
+  date        DateTime
+  kind        String // Sale | Return | Interest | InterestReturn
+  category    String? // Odoo product category group (vehicle / installment / interest / other)
+  paymentType String            @default("CashBank") // CashBank | Installment
+  account     String?
+  customer    String?
+  product     String?
+  brand       String?
+  invoiceNo   String?
+  matchingNo  String?
+  chassis     String?
+  chassisCost Float? // تكلفة الشاسية
+  color       String?
+  modelYear   String?
+  unitPrice   Float?
+  branch      String? // الشركة (showroom)
+  credit      Float             @default(0)
+  debit       Float             @default(0)
+  amount      Float             @default(0) // credit - debit
+  importId    Int?
+  import      ReceivableImport? @relation(fields: [importId], references: [id], onDelete: SetNull)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([date])
+  @@index([kind])
+}
