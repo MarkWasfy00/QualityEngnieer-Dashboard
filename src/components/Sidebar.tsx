@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Car, ClipboardCheck, AlertTriangle, Wrench, MessageSquareWarning, FileDown, Users, HandCoins, DoorOpen, BadgeCheck, Building2, Gauge, Wallet, TrendingUp } from "lucide-react";
+import { LayoutDashboard, Car, ClipboardCheck, AlertTriangle, Wrench, MessageSquareWarning, FileDown, Users, HandCoins, DoorOpen, BadgeCheck, Building2, Gauge, Wallet, TrendingUp, FileSpreadsheet, Upload } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,
 } from "@/components/ui/sidebar";
@@ -18,6 +18,8 @@ const NAV = [
   { href: "/visits", label: "زيارات العملاء", icon: DoorOpen },
   { href: "/sales-report", label: "تحليل المبيعات (أودو)", icon: TrendingUp },
   { href: "/receivables", label: "المديونيات والتحصيل", icon: Wallet },
+  { href: "/data", label: "تقارير الإكسيل", icon: FileSpreadsheet },
+  { href: "/receivables/import", label: "رفع ملفات إكسيل", icon: Upload },
   { href: "/workers", label: "أداء العمال", icon: Users },
   { href: "/branches/quality", label: "جودة الفروع", icon: Gauge },
   { href: "/branches", label: "الفروع", icon: Building2 },

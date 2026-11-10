@@ -7,18 +7,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import ReceivablesUpload from "@/components/ReceivablesUpload";
+import { kindLabel } from "@/lib/datasets/store";
 
 const when = (d: Date) => d.toLocaleString("ar-EG-u-nu-latn", { dateStyle: "medium", timeStyle: "short" });
 
 export default async function ReceivablesImportPage() {
-  const [imports, total, lines] = await Promise.all([
-    prisma.receivableImport.findMany({ orderBy: { createdAt: "desc" }, take: 30 }),
+  const [imports, total, lines, other] = await Promise.all([
+    prisma.receivableImport.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
     prisma.receivable.count(),
     prisma.salesLine.count(),
+    prisma.dataRow.count(),
   ]);
   return (
     <>
-      <PageHeader title="رفع ملفات الإكسيل" subtitle={`شيت المديونيات أو قيود المبيعات من أودو · المتسجل حاليًا ${int(total)} صفقة مديونية و ${int(lines)} قيد مبيعات`}>
+      <PageHeader title="رفع ملفات الإكسيل" subtitle={`المتسجل حاليًا ${int(total)} صفقة مديونية و ${int(lines)} قيد مبيعات و ${int(other)} سطر من باقي الشيتات`}>
+        <Button asChild variant="outline"><Link href="/data"><BarChart3 /> تقارير الإكسيل</Link></Button>
         <Button asChild variant="outline"><Link href="/receivables"><BarChart3 /> أداء التحصيل</Link></Button>
         <Button asChild variant="outline"><Link href="/sales-report"><BarChart3 /> تحليل المبيعات</Link></Button>
       </PageHeader>
@@ -37,12 +40,12 @@ export default async function ReceivablesImportPage() {
                 <TableRow key={i.id}>
                   <TableCell>{when(i.createdAt)}</TableCell>
                   <TableCell className="whitespace-normal">{i.fileName}</TableCell>
-                  <TableCell>{i.kind === "journal" ? "قيود مبيعات أودو" : "مديونيات"}</TableCell>
+                  <TableCell className="whitespace-normal">{kindLabel(i.kind, i.columns)}</TableCell>
                   <TableCell className="whitespace-normal text-muted-foreground">{i.sheets}</TableCell>
                   <TableCell>{int(i.total)}</TableCell>
                   <TableCell>{int(i.created)}</TableCell>
                   <TableCell>{int(i.updated)}</TableCell>
-                  <TableCell>{i.replaced ? "استبدال كامل" : "تحديث وإضافة"}</TableCell>
+                  <TableCell>{i.replaced ? "استبدال" : "تحديث وإضافة"}</TableCell>
                 </TableRow>
               ))}
               {!imports.length && <TableRow className="hover:bg-transparent"><TableCell colSpan={8} className="py-10 text-center text-muted-foreground">لسه مفيش ملفات اترفعت.</TableCell></TableRow>}

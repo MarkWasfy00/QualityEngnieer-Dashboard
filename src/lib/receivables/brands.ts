@@ -37,17 +37,25 @@ const BRANDS: [string, string[]][] = [
   ["بي واي دي", ["بى واى دى", "byd"]],
   ["DFSK", ["ديفسك", "dfsk", "dfske"]],
   ["KGM", ["kgm"]],
-  ["iCAUR", ["icaur"]],
+  ["iCAUR", ["icaur", "icaure", "i caure", "i caur", "اى كور"]],
   ["سيات / كوبرا", ["سيات", "سييات", "سايت", "seat", "كوبرا", "cupra", "ابيزا", "ibiza", "ارونا", "leon"]],
 ].map(([b, ks]) => [b as string, (ks as string[]).map((k) => norm(k).toLowerCase())]);
 
-export function carBrand(car: string | null | undefined): string {
-  if (!car) return "غير محدد";
-  const t = ` ${norm(car).toLowerCase().replace(/[-_/]/g, " ")} `;
+/** The brand if the text names a known one, otherwise null. */
+export function knownBrand(car: string | null | undefined): string | null {
+  if (!car) return null;
+  const t = ` ${norm(car).toLowerCase().replace(/[-_/|]/g, " ")} `;
   for (const [brand, keys] of BRANDS) {
     // Latin keys must be whole words ("mg" inside another word shouldn't count).
     if (keys.some((k) => (/^[a-z0-9 ]+$/.test(k) ? new RegExp(`(^|[^a-z0-9])${k}([^a-z0-9]|$)`).test(t) : t.includes(k)))) return brand;
   }
+  return null;
+}
+
+export function carBrand(car: string | null | undefined): string {
+  if (!car) return "غير محدد";
+  const known = knownBrand(car);
+  if (known) return known;
   // Unknown brand: first word, with common end-letter variants unified (دبابة/دبابه، قصراوى/قصراوي).
   const first = car.replace(/\s+/g, " ").trim().split(/[ -]/)[0].replace(/ة$/, "ه").replace(/ى$/, "ي");
   return first && !/^\d+$/.test(first) ? first : "غير محدد";

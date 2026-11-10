@@ -210,9 +210,11 @@ model ReceivableImport {
   kind       String       @default("receivables") // receivables | journal
   replaced   Boolean      @default(false)
   warnings   String? // JSON array of short messages
+  columns    String? // JSON field list, only for auto-detected (unknown) tables
   createdAt  DateTime     @default(now())
   rows       Receivable[]
   lines      SalesLine[]
+  dataRows   DataRow[]
 }
 
 /// One line of the Odoo sales journal export (عنصر اليومية / account.move.line): a car sale, a return, or installment interest.
@@ -245,4 +247,21 @@ model SalesLine {
 
   @@index([date])
   @@index([kind])
+}
+
+/// One row of any other recognized Excel layout (stock lists, Odoo exports, bank sales, debts, supplier claims…).
+/// `format` is the layout id from src/lib/datasets/formats; the row itself is kept as JSON.
+model DataRow {
+  id        Int               @id @default(autoincrement())
+  format    String
+  key       String
+  data      String // JSON object: field key -> value (dates as yyyy-mm-dd)
+  date      DateTime? // the layout's main date (for period filters)
+  sheet     String?
+  importId  Int?
+  import    ReceivableImport? @relation(fields: [importId], references: [id], onDelete: SetNull)
+  createdAt DateTime          @default(now())
+
+  @@unique([format, key])
+  @@index([format, date])
 }
